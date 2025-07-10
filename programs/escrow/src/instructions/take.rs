@@ -15,11 +15,11 @@ pub struct Take<'info> {
     #[account(mut)]
     pub maker: SystemAccount<'info>,
     #[account(
-        mint::token_program = token_program
+        mint::token_program = token_program_a
     )]
     pub mint_a: InterfaceAccount<'info, Mint>,
     #[account(
-        mint::token_program = token_program
+        mint::token_program = token_program_b
     )]
     pub mint_b: InterfaceAccount<'info, Mint>,
     #[account(
@@ -27,14 +27,14 @@ pub struct Take<'info> {
         payer = taker,
         associated_token::mint = mint_a,
         associated_token::authority = taker,
-        associated_token::token_program = token_program
+        associated_token::token_program = token_program_a
     )]
     pub taker_ata_a: InterfaceAccount<'info, TokenAccount>,
     #[account(
         mut,
         associated_token::mint = mint_b,
         associated_token::authority = taker,
-        associated_token::token_program = token_program
+        associated_token::token_program = token_program_b
     )]
     pub taker_ata_b: InterfaceAccount<'info, TokenAccount>,
     #[account(
@@ -42,7 +42,7 @@ pub struct Take<'info> {
         payer = taker,
         associated_token::mint = mint_b,
         associated_token::authority = maker,
-        associated_token::token_program = token_program
+        associated_token::token_program = token_program_b
     )]
     pub maker_ata_b: InterfaceAccount<'info, TokenAccount>,
     #[account(
@@ -57,11 +57,12 @@ pub struct Take<'info> {
         mut,
         associated_token::mint = mint_a,
         associated_token::authority = escrow,
-        associated_token::token_program = token_program
+        associated_token::token_program = token_program_a
     )]
     pub vault: InterfaceAccount<'info, TokenAccount>,
     pub associated_token_program: Program<'info, AssociatedToken>,
-    pub token_program: Interface<'info, TokenInterface>,
+    pub token_program_a: Interface<'info, TokenInterface>,
+    pub token_program_b: Interface<'info, TokenInterface>,
     pub system_program: Program<'info, System>,
 }
 
@@ -75,7 +76,7 @@ impl<'info> Take<'info> {
             authority: self.taker.to_account_info(),
         };
 
-        let transfer_ctx = CpiContext::new(self.token_program.to_account_info(), transfer_accounts);
+        let transfer_ctx = CpiContext::new(self.token_program_b.to_account_info(), transfer_accounts);
 
         transfer_checked(transfer_ctx, self.escrow.receive, self.mint_b.decimals)
     }
@@ -97,7 +98,7 @@ impl<'info> Take<'info> {
         ]];
 
         let transfer_ctx = CpiContext::new_with_signer(
-            self.token_program.to_account_info(),
+            self.token_program_a.to_account_info(),
             transfer_accounts,
             signer_seeds,
         );
@@ -112,7 +113,7 @@ impl<'info> Take<'info> {
         };
 
         let close_ctx = CpiContext::new_with_signer(
-            self.token_program.to_account_info(),
+            self.token_program_a.to_account_info(),
             close_accounts,
             signer_seeds,
         );

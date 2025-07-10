@@ -24,10 +24,6 @@ pub struct Make<'info> {
         mint::token_program = token_program
     )]
     pub mint_a: InterfaceAccount<'info, Mint>,
-
-    #[account(
-        mint::token_program = token_program
-    )]
     pub mint_b: InterfaceAccount<'info, Mint>,
 
     #[account(
